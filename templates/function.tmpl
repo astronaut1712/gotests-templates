@@ -34,7 +34,7 @@ func {{.TestName}}(t *testing.T) {
 				{{- if .IsStruct}}
 					{{Receiver .}} := {{if .Type.IsStar}}&{{end}}{{.Type.Value}}{
 					{{- range .Fields}}
-						{{.Name}}: tt.fields.{{Field .}},
+						{{.Name}}: fields.{{Field .}},
 					{{- end}}
 					}
 				{{- end}}
@@ -48,15 +48,15 @@ func {{.TestName}}(t *testing.T) {
 				{{template "results" $f}} {{template "call" $f}}
 			{{- end}}
 			{{- if .ReturnsError}}
-				if {{if .OnlyReturnsError}} err := {{template "call" $f}}; {{end}} (err != nil) != tt.wantErr {
-					t.Errorf("{{template "message" $f}} error = %v, wantErr %v", {{template "inputs" $f}} err, tt.wantErr)
+				if {{if .OnlyReturnsError}} err := {{template "call" $f}}; {{end}} (err != nil) != w.wantErr {
+					t.Errorf("{{template "message" $f}} error = %v, wantErr %v", {{template "inputs" $f}} err, w.wantErr)
 					{{- if .TestResults}}
 						{{if .Subtests }}return{{else}}continue{{end}}
 					{{- end}}
 				}
 			{{- end}}
 			{{- range .TestResults}}
-				if diff := cmp.Diff({{Got .}}, tt.{{Want .}}); diff != "" {
+				if diff := cmp.Diff({{Got .}}, w.{{Want .}}); diff != "" {
 				t.Errorf("{{template "message" $f}} {{if $f.ReturnsMultiple}}{{Got .}} {{end}}!= want: %s", diff)
 				}
 			{{- end}}
