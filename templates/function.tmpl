@@ -5,7 +5,18 @@ func {{.TestName}}(t *testing.T) {
 	{{- with .Receiver}}
 		{{- if .IsStruct}}
 			{{- if .Fields}}
-				type _fields struct {
+				// Define mock here if needed
+				{{- range .Fields}}
+					// m{{Field .}} := ...
+				{{- end}}
+			{{- end}}
+		{{- end}}
+	{{- end}}
+	
+	{{- with .Receiver}}
+		{{- if .IsStruct}}
+			{{- if .Fields}}
+				type fields struct {
 				{{- range .Fields}}
 					{{Field .}} {{.Type}}
 				{{- end}}
@@ -13,6 +24,19 @@ func {{.TestName}}(t *testing.T) {
 			{{- end}}
 		{{- end}}
 	{{- end}}
+
+	{{- with .Receiver}}
+		{{- if .IsStruct}}
+			{{- if .Fields}}
+				_fields := fields {
+				{{- range .Fields}}
+					{{Field .}}: m{{Field .}},
+				{{- end}}
+				}
+			{{- end}}
+		{{- end}}
+	{{- end}}
+
 	{{- if .TestParameters}}
 	type args struct {
 		{{- range .TestParameters}}
@@ -29,7 +53,7 @@ func {{.TestName}}(t *testing.T) {
 			wantErr bool
 		{{- end}}
     }
-	runFunc := func(t *testing.T, fields _fields, args args, w wants) {
+	runFunc := func(t *testing.T, fields fields, args args, w wants) {
 			{{- with .Receiver}}
 				{{- if .IsStruct}}
 					{{Receiver .}} := {{if .Type.IsStar}}&{{end}}{{.Type.Value}}{
