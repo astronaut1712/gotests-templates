@@ -53,7 +53,7 @@ func {{.TestName}}(t *testing.T) {
 			wantErr bool
 		{{- end}}
     }
-	runFunc := func(t *testing.T, fields fields, args args, w wants) {
+    runFunc := func(t *testing.T,{{with .Receiver}} {{if .IsStruct}}fields fields,{{- end}}{{- end}} args args, w wants) {
 			{{- with .Receiver}}
 				{{- if .IsStruct}}
 					{{Receiver .}} := {{if .Type.IsStar}}&{{end}}{{.Type.Value}}{
@@ -68,7 +68,7 @@ func {{.TestName}}(t *testing.T) {
 					{{Param .}} := &bytes.Buffer{}
 				{{- end}}
 			{{- end}}
-			{{- if and (not .OnlyReturnsError) (not .OnlyReturnsOneValue) }}
+			{{- if not .ReturnsError }}
 				{{template "results" $f}} {{template "call" $f}}
 			{{- end}}
 			{{- if .ReturnsError}}
@@ -87,9 +87,7 @@ func {{.TestName}}(t *testing.T) {
 	}
 
 	t.Run("Test case #1: TODO: Add testcase here", func(t *testing.T) {
-		runFunc(t, _fields, args{}, wants{
-			true,
-		})
+		runFunc(t, {{with .Receiver}} {{if .IsStruct}}_fields,{{- end}}{{- end}} args{}, wants{})
 	})
 }
 
